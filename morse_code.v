@@ -39,7 +39,7 @@ localparam S_Q = 26;            // --.-
 
 reg [4:0] state, next_state;    // 5 bits --> 32 bits to hold 27 states
 reg [63:0] bank;                // Holds 7 letters; these are the stored letters
-reg [7:0] current_letter;       // Displayed as the current letter on the board
+reg [4:0] current_letter;       // Displayed as the current letter on the board
                                 // Letters are capital letters in binary (e.g. )
 
 // State transition logic
@@ -54,14 +54,14 @@ reg [7:0] current_letter;       // Displayed as the current letter on the board
 always @(*) begin
     case(state)
     S_START: begin
-        current_letter <= 8'd0;
+        current_letter <= 5'd0;
         if (clear)      next_state <= S_START;
         else if (dot)   next_state <= S_E;
         else if (dash)  next_state <= S_T;
         else            next_state <= state;            // if both buttons are pressed at the same time, remains in the same state
     end
     S_E: begin
-        current_letter <= 8'b01000101;
+        current_letter <= 5'd5;
         if (clear || store)      next_state <= S_START;
         else if (dot)   next_state <= S_I;
         else if (dash)  next_state <= S_A;
