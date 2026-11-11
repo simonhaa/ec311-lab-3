@@ -16,7 +16,7 @@ always @(*) begin
     5'd7:  seg_out = 7'b1011110; // G
     5'd8:  seg_out = 7'b0010111; // H
     5'd9:  seg_out = 7'b1110000; // I (?)
-    5'd10:  seg_out = 7'b1111000; // J
+    5'd10: seg_out = 7'b1111000; // J
     5'd11: seg_out = 7'b1010111; // K (?)
     5'd12: seg_out = 7'b0001110; // L
     5'd13: seg_out = 7'b1010101; // M (?)
