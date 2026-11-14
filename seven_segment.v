@@ -1,7 +1,7 @@
 module seven_segment (
     input [4:0] in,
     output [6:0] seg
-)
+);
 
 reg [6:0] seg_out;
 
