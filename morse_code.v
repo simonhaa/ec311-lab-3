@@ -39,6 +39,7 @@ localparam S_Q = 26;            // --.-
 
 reg [4:0] state, next_state;    // 5 bits --> 32 bits to hold 27 states
 reg [63:0] bank;                // Holds 7 letters; these are the stored letters
+reg [4:0] bank0, bank1, bank2, bank3, bank4, bank5, bank6, bank7;
 reg [4:0] current_letter;       // Displayed as the current letter on the board
                                 // Letters are capital letters in binary (e.g. )
 
@@ -91,6 +92,43 @@ always @(*) begin
     default: state <= S_START;
     endcase
 end
+
+// Stores the current letter into the partitioned banks for the display
+// Current_letter is continuously stored into the first bank, which means the display always shows it
+// Keep in morse_code.v
+always @(posedge clk) begin
+    bank0 <= current_letter;
+    if (rst) begin
+        bank0 <= 5'd0;
+        bank1 <= 5'd0;
+        bank2 <= 5'd0;
+        bank3 <= 5'd0;
+        bank4 <= 5'd0;
+        bank5 <= 5'd0;
+        bank6 <= 5'd0;
+        bank7 <= 5'd0;
+    end else if (store) begin
+        bank1 <= bank0;
+        bank2 <= bank1;
+        bank3 <= bank2;
+        bank4 <= bank3;
+        bank5 <= bank4;
+        bank6 <= bank5;
+        bank7 <= bank6;
+    end
+end
+
+// 8 instantiations of the seven segment which will display the numbers
+// Placed in the top module
+wire [6:0] seg0, seg1, seg2, seg3, seg4, seg5, seg6, seg7;
+seven_segment d0 (.in(bank0), .seg(seg0));
+seven_segment d1 (.in(bank1), .seg(seg1));
+seven_segment d2 (.in(bank2), .seg(seg2));
+seven_segment d3 (.in(bank3), .seg(seg3));
+seven_segment d4 (.in(bank4), .seg(seg4));
+seven_segment d5 (.in(bank5), .seg(seg5));
+seven_segment d6 (.in(bank6), .seg(seg6));
+seven_segment d7 (.in(bank7), .seg(seg7));
 
 // State flip flops
 always @(posedge clk) begin
