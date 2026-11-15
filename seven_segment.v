@@ -33,7 +33,7 @@ always @(*) begin
     5'd22: seg_out = 7'b0110110; // X (?)
     5'd24: seg_out = 7'b0111011; // Y
     5'd25: seg_out = 7'b1101100; // Z (?)
-    default: seg_out = 7'b0000000; // 27-31 blank
+    default: seg_out = 7'b0000001; // 27-31 blank
     endcase
 end
 

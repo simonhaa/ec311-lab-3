@@ -48,12 +48,12 @@ reg [4:0] state, next_state;    // 5 bits --> 32 bits to hold 27 states
 // a decoder for each byte in bank
 // For the display of the current_letter, current_letter is always the first 8 bits in bank (little-endian), without the use of store
 // This would mean that the first instantiated hex-to-7sig module would display these 8 bits
-    // When store is pressed, the current_letter shifts to bank[55:48] and repeats forever
-    // When bank is full, the first 8 bits would just be continuously be shifted out
+// When store is pressed, the current_letter shifts to bank[55:48] and repeats forever
+// When bank is full, the first 8 bits would just be continuously be shifted out
+assign states = state; 
 always @(*) begin
 next_state = state;
-if (clear || store)      next_state = S_START;
-    case(state)
+case(state)
     S_START: begin
         if (dot)   next_state = S_E;
         else if (dash)  next_state = S_T;
@@ -162,6 +162,7 @@ if (clear || store)      next_state = S_START;
     end
     default: next_state = S_START;
     endcase
+if (clear || store)      next_state = S_START;
 end
 
 // Stores the current letter into the partitioned banks for the display

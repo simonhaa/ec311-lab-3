@@ -57,19 +57,20 @@ end
 
 
 reg [CLK_WIDTH:0] counter;
-wire [1:0] divCounter;
+wire [2:0] divCounter;
 reg [3:0] input_hex;
 
-reg [4:0] bank1,bank2,bank3,bank4,bank5,bank6,bank7;                // Holds 7 letters; these are the stored letters
-reg [4:0] states,in;
+reg [4:0] bank1,bank2,bank3,bank4,bank5,bank6,bank7, in;                // Holds 7 letters; these are the stored letters
+wire [4:0] states;
+wire d_dot, d_dash, d_store, d_undo, d_clear;
 
 morse_code morse(
 .clk(clk),
-.dot(BTNL),
-.dash(BTNR),
-.store(BTNC),
-.undo(BTNU),
-.clear(BTND),
+.dot(d_dot),
+.dash(d_dash),
+.store(d_store),
+.undo(d_undo),
+.clear(d_clear),
 .rst(rst),
 .states(states));
 
@@ -84,9 +85,33 @@ seven_segment sev(
         if (rst) counter <= 0;
         else counter <= counter + 1;
     end
+//debouncers
+debouncer b_dot(.clk(clk),
+.rst(rst),
+.button(BTNL),
+.single_cycle_button(d_dot));
 
-    assign divCounter = counter[CLK_WIDTH-:3];
+debouncer b_dash(.clk(clk),
+.rst(rst),
+.button(BTNR),
+.single_cycle_button(d_dash));
 
+debouncer b_store(.clk(clk),
+.rst(rst),
+.button(BTNC),
+.single_cycle_button(d_store));
+
+debouncer b_undo(.clk(clk),
+.rst(rst),
+.button(BTNU),
+.single_cycle_button(d_undo));
+
+debouncer b_clear(.clk(clk),
+.rst(rst),
+.button(BTND),
+.single_cycle_button(d_clear));
+
+assign divCounter = counter[CLK_WIDTH-:3];
     always @* begin
         case(divCounter)
         0: begin
