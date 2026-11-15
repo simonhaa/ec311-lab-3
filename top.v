@@ -85,7 +85,7 @@ seven_segment sev(
         else counter <= counter + 1;
     end
 
-    assign divCounter = counter[CLK_WIDTH-:2];
+    assign divCounter = counter[CLK_WIDTH-:3];
 
     always @* begin
         case(divCounter)

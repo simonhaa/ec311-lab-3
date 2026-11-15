@@ -52,7 +52,7 @@ reg [4:0] state, next_state;    // 5 bits --> 32 bits to hold 27 states
     // When bank is full, the first 8 bits would just be continuously be shifted out
 always @(*) begin
 next_state = state;
-if (clear)      next_state = S_START;
+if (clear || store)      next_state = S_START;
     case(state)
     S_START: begin
         if (dot)   next_state = S_E;
