@@ -5,8 +5,8 @@ module morse_code #(parameter CLK_WIDTH = 16)(
     input store,                // BTNC (center button)
     input undo,                 // BTNU (up button) Moves back one state
     input clear,                // BTND (down button) Resets the FSM back to Start
-    input rst,
-    output [4:0] states           // 64 bits for 8 letters (which are 8 bits each)
+    input rst,                  // Active-high synchronous reset
+    output [4:0] states         // Output states for the storing logic to use in the top module
 );
 
 // State encodings
@@ -50,132 +50,127 @@ reg [4:0] state, next_state;    // 5 bits --> 32 bits to hold 27 states
 // This would mean that the first instantiated hex-to-7sig module would display these 8 bits
 // When store is pressed, the current_letter shifts to bank[55:48] and repeats forever
 // When bank is full, the first 8 bits would just be continuously be shifted out
-assign states = state; 
+
 always @(*) begin
-next_state = state;
-case(state)
-    S_START: begin
-        if (dot)   next_state = S_E;
-        else if (dash)  next_state = S_T;
-    end
-    S_E: begin
-        if (dot)   next_state = S_I;
-        else if (dash)  next_state = S_A;
-        else if (undo)  next_state = S_START;
-    end
-    S_T: begin
-        if (dot)   next_state = S_N;
-        else if (dash)  next_state = S_M;
-        else if (undo)  next_state = S_START;
-    end
-    S_I: begin
-        if (dot)   next_state = S_S;
-        else if (dash)  next_state = S_U;
-        else if (undo)  next_state = S_E;
-    end
-    S_A: begin
-        if (dot)   next_state = S_R;
-        else if (dash)  next_state = S_W;
-        else if (undo)  next_state = S_E;
-    end
-    S_N: begin
-        if (dot)   next_state = S_D;
-        else if (dash)  next_state = S_K;
-        else if (undo)  next_state = S_T;
-    end
-    S_M: begin
-        if (dot)   next_state = S_G;
-        else if (dash)  next_state = S_O;
-        else if (undo)  next_state = S_T;
-    end
-    S_S: begin
-        if (dot)   next_state = S_H;
-        else if (dash)  next_state = S_V;
-        else if (undo)  next_state = S_I;
-    end
-    S_U: begin
-        if (dot)   next_state = S_F;
-        else if (undo)  next_state = S_I;
-    end
-    S_R: begin
-        if (dot)   next_state = S_L;
-        else if (undo)  next_state = S_A;
-    end
-    S_W: begin
-        if (dot)   next_state = S_P;
-        else if (dash)  next_state = S_J;
-        else if (undo)  next_state = S_A;
-    end
-    S_D: begin
-        if (dot)   next_state = S_B;
-        else if (dash)  next_state = S_X;
-        else if (undo)  next_state = S_N;
-    end
-    S_K: begin
-        if (dot)   next_state = S_C;
-        else if (dash)  next_state = S_Y;
-        else if (undo)  next_state = S_N;
-    end
-    S_G: begin
-        if (dot)   next_state = S_Z;
-        else if (dash)  next_state = S_Q;
-        else if (undo)  next_state = S_M;
-    end
-    S_O: begin
-        if (undo)  next_state = S_M;
-    end
-    S_H: begin
-        if (undo)  next_state = S_S;
-    end
-    S_V: begin
-        if (undo)  next_state = S_S;
-    end
-    S_F: begin
-        if (undo)  next_state = S_U;
-    end
-    S_L: begin
-        if (undo)  next_state = S_R;
-    end
-    S_P: begin
-        if (undo)  next_state = S_W;
-    end
-    S_J: begin
-        if (undo)  next_state = S_W;
-    end
-    S_B: begin
-        if (undo)  next_state = S_D;
-    end
-    S_X: begin
-        if (undo)  next_state = S_D;
-    end
-    S_C: begin
-        if (undo)  next_state = S_K;
-    end
-    S_Y: begin
-        if (undo)  next_state = S_K;
-    end
-    S_Z: begin
-        if (undo)  next_state = S_G;
-    end
-    S_Q: begin
-        if (undo)  next_state = S_G;
-    end
-    default: next_state = S_START;
-    endcase
-if (clear || store)      next_state = S_START;
+    next_state = state;
+    case(state)
+        S_START: begin
+            if (dot)   next_state = S_E;
+            else if (dash)  next_state = S_T;
+        end
+        S_E: begin
+            if (dot)   next_state = S_I;
+            else if (dash)  next_state = S_A;
+            else if (undo)  next_state = S_START;
+        end
+        S_T: begin
+            if (dot)   next_state = S_N;
+            else if (dash)  next_state = S_M;
+            else if (undo)  next_state = S_START;
+        end
+        S_I: begin
+            if (dot)   next_state = S_S;
+            else if (dash)  next_state = S_U;
+            else if (undo)  next_state = S_E;
+        end
+        S_A: begin
+            if (dot)   next_state = S_R;
+            else if (dash)  next_state = S_W;
+            else if (undo)  next_state = S_E;
+        end
+        S_N: begin
+            if (dot)   next_state = S_D;
+            else if (dash)  next_state = S_K;
+            else if (undo)  next_state = S_T;
+        end
+        S_M: begin
+            if (dot)   next_state = S_G;
+            else if (dash)  next_state = S_O;
+            else if (undo)  next_state = S_T;
+        end
+        S_S: begin
+            if (dot)   next_state = S_H;
+            else if (dash)  next_state = S_V;
+            else if (undo)  next_state = S_I;
+        end
+        S_U: begin
+            if (dot)   next_state = S_F;
+            else if (undo)  next_state = S_I;
+        end
+        S_R: begin
+            if (dot)   next_state = S_L;
+            else if (undo)  next_state = S_A;
+        end
+        S_W: begin
+            if (dot)   next_state = S_P;
+            else if (dash)  next_state = S_J;
+            else if (undo)  next_state = S_A;
+        end
+        S_D: begin
+            if (dot)   next_state = S_B;
+            else if (dash)  next_state = S_X;
+            else if (undo)  next_state = S_N;
+        end
+        S_K: begin
+            if (dot)   next_state = S_C;
+            else if (dash)  next_state = S_Y;
+            else if (undo)  next_state = S_N;
+        end
+        S_G: begin
+            if (dot)   next_state = S_Z;
+            else if (dash)  next_state = S_Q;
+            else if (undo)  next_state = S_M;
+        end
+        S_O: begin
+            if (undo)  next_state = S_M;
+        end
+        S_H: begin
+            if (undo)  next_state = S_S;
+        end
+        S_V: begin
+            if (undo)  next_state = S_S;
+        end
+        S_F: begin
+            if (undo)  next_state = S_U;
+        end
+        S_L: begin
+            if (undo)  next_state = S_R;
+        end
+        S_P: begin
+            if (undo)  next_state = S_W;
+        end
+        S_J: begin
+            if (undo)  next_state = S_W;
+        end
+        S_B: begin
+            if (undo)  next_state = S_D;
+        end
+        S_X: begin
+            if (undo)  next_state = S_D;
+        end
+        S_C: begin
+            if (undo)  next_state = S_K;
+        end
+        S_Y: begin
+            if (undo)  next_state = S_K;
+        end
+        S_Z: begin
+            if (undo)  next_state = S_G;
+        end
+        S_Q: begin
+            if (undo)  next_state = S_G;
+        end
+        default: next_state = S_START;
+        endcase
+    if (clear || store) next_state = S_START;
 end
-
-// Stores the current letter into the partitioned banks for the display
-// Current_letter is continuously stored into the first bank, which means the display always shows it
-// Keep in morse_code.v
-
-
-// 8 instantiations of the seven segment which will display the numbers
-// Placed in the top module
 
 // State flip flops
 always @(posedge clk) begin
     state <= (rst) ? S_START : next_state;
 end
+
+// Output logic
+assign states = state;
 
 endmodule
