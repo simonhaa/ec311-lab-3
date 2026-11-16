@@ -21,17 +21,29 @@
 
 
 module top #(parameter CLK_WIDTH = 16) (
-    input clk,                  // System clock
-    input BTNL,                  // BTNL (left button)
-    input BTNR,                 // BTNR (right button)
-    input BTNC,                // BTNC (center button)
-    input BTNU,                 // BTNU (up button) Moves back one state
-    input BTND,                // BTND (down button) Resets the FSM back to Start
-    input rst,
-    output [6:0] segments,          
+    input clk,                      // System clock
+    input BTNL,                     // BTNL (left button)
+    input BTNR,                     // BTNR (right button)
+    input BTNC,                     // BTNC (center button)
+    input BTNU,                     // BTNU (up button) Moves back one state
+    input BTND,                     // BTND (down button) Resets the FSM back to Start
+    input rst,                      // Active-high synchronous reset
+    output [6:0] segments,          // Drives seven segment display
     output reg [7:0] AN
     );
     
+// 8 banks; first bank holds the current letter; rest of them store letters
+reg [4:0] bank1, bank2, bank3, bank4, bank5, bank6, bank7;
+
+// Display multiplexer
+reg [4:0] in;
+// Morse output
+wire [4:0] states;
+// Debounced buttons
+wire d_dot, d_dash, d_store, d_undo, d_clear;
+
+// Bank 1 holds the value of current letter
+// When 'store' is pressed, bank 2 holds the previous value of current letter; each 'store' sets the value of the next bank equal to the current bank
 always @(posedge clk) begin
     if (rst) begin
         bank1 <= 5'd0;
@@ -41,7 +53,7 @@ always @(posedge clk) begin
         bank5 <= 5'd0;
         bank6 <= 5'd0;
         bank7 <= 5'd0;
-    end else if (BTNC) begin
+    end else if (d_store) begin
         bank1 <= states;
         bank2 <= bank1;
         bank3 <= bank2;
@@ -51,18 +63,6 @@ always @(posedge clk) begin
         bank7 <= bank6;
     end
 end
-
-
-//add debouncer pls
-
-
-reg [CLK_WIDTH:0] counter;
-wire [2:0] divCounter;
-reg [3:0] input_hex;
-
-reg [4:0] bank1,bank2,bank3,bank4,bank5,bank6,bank7, in;                // Holds 7 letters; these are the stored letters
-wire [4:0] states;
-wire d_dot, d_dash, d_store, d_undo, d_clear;
 
 morse_code morse(
 .clk(clk),
@@ -74,18 +74,11 @@ morse_code morse(
 .rst(rst),
 .states(states));
 
-
 seven_segment sev(
 .in(in),
 .seg(segments));
 
-
-// State flip flops
-    always @(posedge clk or posedge rst) begin
-        if (rst) counter <= 0;
-        else counter <= counter + 1;
-    end
-//debouncers
+// Debouncers
 debouncer b_dot(.clk(clk),
 .rst(rst),
 .button(BTNL),
@@ -111,51 +104,62 @@ debouncer b_clear(.clk(clk),
 .button(BTND),
 .single_cycle_button(d_clear));
 
+// Refresh counter
+reg [CLK_WIDTH:0] counter;
+wire [2:0] divCounter;
+reg [3:0] input_hex;
+
+always @(posedge clk or posedge rst) begin
+    if (rst) counter <= 0;
+    else counter <= counter + 1;
+end
+
 assign divCounter = counter[CLK_WIDTH-:3];
-    always @* begin
-        case(divCounter)
-        0: begin
-        AN = 8'b11111110;
-        in = states;
-        end
-        
-        1: begin
-        AN = 8'b11111101;
-        in = bank1;
-        
-        end
-        2: begin
-        AN = 8'b11111011;
-        in = bank2;
-        end
-     
-        3:begin
-        AN = 8'b11110111;
-        in = bank3;
-        end
-        
-        4:begin
-        AN = 8'b11101111;
-        in = bank4;
-        end
-        
-        5:begin
-        AN = 8'b11011111;
-        in = bank5;
-        end
-        
-        6:begin
-        AN = 8'b10111111;
-        in = bank6;
-        end
-        
-        7:begin
-        AN = 8'b01111111;
-        in = bank7;
-        end
-        
-        endcase
+
+always @(*) begin
+    case (divCounter)
+    0: begin
+    AN = 8'b11111110;
+    in = states;
     end
+    
+    1: begin
+    AN = 8'b11111101;           
+    in = bank1;
+    
+    end
+    2: begin
+    AN = 8'b11111011;          
+    in = bank2;
+    end
+ 
+    3:begin
+    AN = 8'b11110111;           
+    in = bank3;
+    end
+    
+    4:begin
+    AN = 8'b11101111;
+    in = bank4;
+    end
+    
+    5:begin
+    AN = 8'b11011111;
+    in = bank5;
+    end
+    
+    6:begin
+    AN = 8'b10111111;
+    in = bank6;
+    end
+    
+    7:begin
+    AN = 8'b01111111;
+    in = bank7;
+    end
+    
+    endcase
+end
     
     
 endmodule
