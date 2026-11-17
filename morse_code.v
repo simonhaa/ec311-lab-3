@@ -1,4 +1,4 @@
-module morse_code #(parameter CLK_WIDTH = 16)( 
+module morse_code ( 
     input clk,                  // System clock
     input dot,                  // BTNL (left button)
     input dash,                 // BTNR (right button)

@@ -37,8 +37,10 @@ reg [4:0] bank1, bank2, bank3, bank4, bank5, bank6, bank7;
 
 // Display multiplexer
 reg [4:0] in;
+
 // Morse output
 wire [4:0] states;
+
 // Debounced buttons
 wire d_dot, d_dash, d_store, d_undo, d_clear;
 
